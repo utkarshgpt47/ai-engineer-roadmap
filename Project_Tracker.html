@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive AI Engineer Roadmap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Harmony (Tailwind Slate/Zinc with Sky accent) -->
+    <!-- Application Structure Plan: The application is designed as an interactive dashboard centered around a 24-month timeline. This structure was chosen over a linear document to make the extensive information manageable and actionable. The user can get a high-level overview from the timeline and dive into specific details on demand. A persistent sidebar navigation allows for non-linear, thematic exploration of key content pillars (Projects, Resources, Tools), which is more user-friendly for quickly referencing specific information. This interactive, component-based structure aims to reduce cognitive load and turn the roadmap from a static document into a dynamic personal guide. -->
+    <!-- Visualization & Content Choices: 
+        - Roadmap Timeline (HTML/CSS/JS): Report Info -> 24-month plan. Goal -> Organize/Change. Viz -> Interactive timeline. Interaction -> Click to display monthly details. Justification -> Visualizes the entire journey and provides a clear "you are here" map.
+        - Skill Transformation Radar Chart (Chart.js): Report Info -> User's starting vs. target skills. Goal -> Inform. Viz -> Radar Chart. Interaction -> Static. Justification -> Powerfully visualizes the "why" of the journey in a single graphic.
+        - Project Portfolio (HTML/CSS/JS): Report Info -> All suggested projects. Goal -> Organize. Viz -> Filterable card grid. Interaction -> Filter by level/topic. Justification -> Allows easy access and comparison of practical tasks.
+        - Resource Library (HTML/CSS/JS): Report Info -> Courses, papers, communities. Goal -> Organize. Viz -> Tabbed lists. Interaction -> Click to expand paper summaries. Justification -> Consolidates all learning materials into an easily searchable directory.
+        - Tools List (HTML/CSS): Report Info -> All mentioned tools/frameworks. Goal -> Inform. Viz -> Categorized list with icons. Interaction -> Static. Justification -> Provides a quick reference for the tech stack to be mastered.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .timeline-item.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 3px #38bdf8; /* sky-400 */
+        }
+        .nav-link.active {
+            background-color: #0c4a6e; /* sky-900 */
+            color: white;
+        }
+        .filter-btn.active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+        }
+        .gemini-output {
+            background-color: #f0f9ff; /* sky-50 */
+            border-left: 4px solid #0ea5e9; /* sky-500 */
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #0ea5e9;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div>
+        <nav id="sidebar" class="bg-slate-800 text-white w-full p-4 space-y-4 md:fixed md:h-screen md:w-64 md:p-6 md:top-0 md:left-0 md:flex md:flex-col">
+            <h1 class="text-2xl font-bold text-sky-400">AI Roadmap</h1>
+            <div class="space-y-2 overflow-y-auto">
+                <a href="#introduction" class="nav-link block p-3 rounded-lg font-medium hover:bg-slate-700 transition-colors duration-200">Introduction</a>
+                <a href="#timeline" class="nav-link block p-3 rounded-lg font-medium hover:bg-slate-700 transition-colors duration-200">Roadmap Timeline</a>
+                <a href="#projects" class="nav-link block p-3 rounded-lg font-medium hover:bg-slate-700 transition-colors duration-200">Project Portfolio</a>
+                <a href="#resources" class="nav-link block p-3 rounded-lg font-medium hover:bg-slate-700 transition-colors duration-200">Resource Library</a>
+                <a href="#tools" class="nav-link block p-3 rounded-lg font-medium hover:bg-slate-700 transition-colors duration-200">Tools & Frameworks</a>
+                <a href="#capstone" class="nav-link block p-3 rounded-lg font-medium hover:bg-slate-700 transition-colors duration-200">Capstone Project</a>
+            </div>
+        </nav>
+
+        <main class="p-4 md:p-8 lg:p-12 md:ml-64">
+            <div id="introduction" class="mb-12">
+                <h2 class="text-4xl font-bold text-slate-900 mb-4">From BI Architect to AI Visionary</h2>
+                <p class="text-lg text-slate-600 mb-8">This interactive dashboard translates your 24-month strategic plan into a dynamic, actionable guide. Your journey is ambitious, moving from the structured world of SQL to the probabilistic frontiers of AI. This tool is designed to be your constant companion, helping you navigate the curriculum, track your progress, and stay focused on the ultimate goal: becoming a world-class AI Engineer. Use the timeline to explore the monthly plan, and the sidebar to jump to specific projects, tools, and resources.</p>
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-slate-800">Your Skill Transformation</h3>
+                    <div class="chart-container">
+                        <canvas id="skillChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="timeline" class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Roadmap Timeline</h2>
+                <p class="text-md text-slate-600 mb-8">Click on any month below to see the detailed plan, including objectives, resources, and the suggested project for that period. The timeline is divided into two key phases, marking your progression from foundational knowledge to innovative application.</p>
+                
+                <div id="timeline-container" class="space-y-10"></div>
+                
+                <div id="details-container" class="mt-10 bg-white p-6 rounded-2xl shadow-lg min-h-[300px]">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" id="details-title">Select a month to view details</h3>
+                    <div id="details-content" class="text-slate-700 space-y-4">
+                        <p>Details for the selected month will appear here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="projects" class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Project Portfolio</h2>
+                <p class="text-md text-slate-600 mb-6">Hands-on projects are critical for building practical skills. This section consolidates all projects from the roadmap. Use the filters to explore projects by their difficulty level or the core topic they cover.</p>
+                
+                <div id="project-generator" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">✨ Project Idea Generator</h3>
+                    <p class="text-slate-600 mb-4">Feeling creative? Select a topic and let Gemini brainstorm some new project ideas for you.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <select id="project-topic-select" class="w-full sm:w-auto flex-grow bg-slate-100 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block p-2.5">
+                        </select>
+                        <button id="generate-projects-btn" class="w-full sm:w-auto bg-sky-600 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-sky-700 transition-colors flex items-center justify-center gap-2">
+                            Generate Project Ideas ✨
+                        </button>
+                    </div>
+                    <div id="project-generator-output" class="mt-4"></div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-6" id="project-filters"></div>
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <div id="resources" class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Resource Library</h2>
+                <p class="text-md text-slate-600 mb-6">This is your centralized library for all recommended learning materials. It includes the essential papers that define the field, top-tier online courses, and the communities that will connect you with the global conversation in AI.</p>
+                <div id="resources-container" class="bg-white p-6 rounded-2xl shadow-lg"></div>
+            </div>
+
+            <div id="tools" class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Tools & Frameworks</h2>
+                <p class="text-md text-slate-600 mb-6">Mastery of the right tools is non-negotiable. This section provides a quick reference to the key technologies you'll need to master, categorized by their role in the AI development lifecycle.</p>
+                <div id="tools-container" class="space-y-6"></div>
+            </div>
+
+            <div id="capstone">
+                 <h2 class="text-3xl font-bold text-slate-900 mb-2">🏆 Final Capstone Project</h2>
+                 <p class="text-md text-slate-600 mb-6">This capstone simulates a project at a top-tier AI organization, requiring you to integrate every skill from the roadmap into a single, high-impact system. It is the ultimate demonstration of your transformation into a production-ready AI Engineer.</p>
+                 <div id="capstone-container" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg space-y-6"></div>
+            </div>
+
+        </main>
+    </div>
+
+<script>
+const roadmapData = {
+    phases: [
+        {
+            name: "Phase I: The Foundational AI Engineer",
+            months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            description: "This initial phase is a crucible designed to forge the core competencies of a top-tier practitioner. It focuses on building an unshakeable, code-centric understanding of mathematics, mastering Python for machine learning, and developing a robust command of the entire deep learning pipeline, from classical algorithms to the Transformer architecture."
+        },
+        {
+            name: "Phase II: The AI Innovator & Researcher",
+            months: [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            description: "The second phase is engineered to elevate you from practitioner to a contributor and leader. The focus shifts from learning established knowledge to mastering advanced optimization techniques, building complex agentic systems, engaging with the conceptual frontiers of AGI and alignment, and establishing a public presence."
+        }
+    ],
+    monthlyDetails: {
+        1: { title: "Python for AI & Intro to Linear Algebra", objective: "Establish strong foundational skills in Python programming and grasp the core concepts of linear algebra, the language of data representation in machine learning.", resources: [{name: "IBM Python for Data Science, AI & Development (Coursera)", url: "https://www.coursera.org/learn/python-for-applied-data-science-ai"}, {name: "DeepLearning.AI Mathematics for Machine Learning - Course 1", url: "https://www.coursera.org/learn/machine-learning-linear-algebra?specialization=mathematics-for-machine-learning-and-data-science"}], project: "The Vector Visualizer" },
+        2: { title: "Essential Calculus for Optimization", objective: "Understand calculus not as an abstract field, but as the engine of optimization that makes machine learning possible. Focus on derivatives, gradients, and the chain rule.", resources: [{name: "DeepLearning.AI Mathematics for Machine Learning - Course 2", url: "https://www.coursera.org/learn/machine-learning-calculus?specialization=mathematics-for-machine-learning-and-data-science"}, {name: "3Blue1Brown's 'Essence of Calculus' (YouTube)", url: "https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr"}], project: "Gradient Descent from Scratch" },
+        3: { title: "Probability & Statistics for Modeling Uncertainty", objective: "Build a robust understanding of probability and statistics, the frameworks for reasoning under uncertainty and evaluating model performance.", resources: [{name: "DeepLearning.AI Mathematics for Machine Learning - Course 3", url: "https://www.coursera.org/learn/machine-learning-probability-and-statistics?specialization=mathematics-for-machine-learning-and-data-science"}, {name: "StatQuest with Josh Starmer (YouTube)", url: "https://www.youtube.com/@statquest"}], project: "Simulating the Central Limit Theorem and EDA" },
+        4: { title: "Solidifying the Python Data Science Stack", objective: "Transition from a beginner to an intermediate Python programmer with deep, practical mastery of NumPy, Pandas, and Matplotlib.", resources: [{name: "University of Michigan 'Applied Data Science with Python' (Coursera)", url: "https://www.coursera.org/specializations/data-science-python"}], project: "Comprehensive Exploratory Data Analysis (EDA)" },
+        5: { title: "Mastering Core Machine Learning (Part 1)", objective: "Master the theory, practice, and evaluation of the most important classical machine learning algorithms, focusing on Supervised Learning.", resources: [{name: "Andrew Ng's Machine Learning Specialization (Coursera)", url: "https://www.coursera.org/specializations/machine-learning-introduction"}], project: "From-Scratch Implementation and Kaggle Competition" },
+        6: { title: "Mastering Core Machine Learning (Part 2)", objective: "Continue mastering classical ML, focusing on Unsupervised Learning and the practical aspects of the ML project lifecycle like cross-validation and hyperparameter tuning.", resources: [{name: "Andrew Ng's Machine Learning Specialization (Coursera)", url: "https://www.coursera.org/specializations/machine-learning-introduction"}], project: "From-Scratch Implementation and Kaggle Competition" },
+        7: { title: "The Leap to Deep Learning and PyTorch", objective: "Bridge the gap from classical ML to deep learning, understanding the fundamental components of neural networks and mastering the PyTorch framework.", resources: [{name: "Andrew Ng's Deep Learning Specialization - Courses 1 & 2", url: "https://www.coursera.org/specializations/deep-learning"}, {name: "Zero to Mastery Learn PyTorch for Deep Learning", url: "https://www.learnpytorch.io/"}], project: "Build a basic neural network in PyTorch" },
+        8: { title: "Architectures for Vision & Sequence - CNNs & RNNs", objective: "Master the two cornerstone architectures of pre-Transformer deep learning: CNNs for spatial data and RNNs for sequential data.", resources: [{name: "Andrew Ng's Deep Learning Specialization - Courses 4 & 5", url: "https://www.coursera.org/specializations/deep-learning"}], project: "The Classic Classifiers (Image & Text)" },
+        9: { title: "The Transformer Architecture & Hugging Face", objective: "Gain a deep, first-principles understanding of the Transformer architecture and achieve practical mastery of the Hugging Face ecosystem.", resources: [{name: "Paper: 'Attention Is All You Need'", url: "https://arxiv.org/abs/1706.03762"}, {name: "Hugging Face NLP Course", url: "https://huggingface.co/learn/nlp-course"}], project: "Appreciating Abstraction (Transformer from Scratch vs. Library)" },
+        10: { title: "Foundational LLM Technique: Fine-Tuning", objective: "Master transfer learning in NLP by fine-tuning large pre-trained models for specific downstream tasks.", resources: [{name: "Paper: 'BERT'", url: "https://arxiv.org/abs/1810.04805"}, {name: "Hugging Face NLP Course", url: "https://huggingface.co/learn/nlp-course"}, {name: "Weights & Biases", url: "https://wandb.ai/"}], project: "Fine-Tuning on the Hub" },
+        11: { title: "Foundational LLM Technique: RAG", objective: "Master the Retrieval-Augmented Generation (RAG) pattern to augment LLMs with external, up-to-date knowledge.", resources: [{name: "Paper: 'RAG'", url: "https://arxiv.org/abs/2005.11401"}, {name: "LlamaIndex", url: "https://www.llamaindex.ai/"}, {name: "LangChain", url: "https://www.langchain.com/"}, {name: "Chroma", url: "https://www.trychroma.com/"}], project: "The PDF Chatbot" },
+        12: { title: "Intro to MLOps and Productionization", objective: "Learn the fundamental skills to take a model from a Jupyter Notebook to a deployable, production-ready application.", resources: [{name: "Docker", url: "https://www.docker.com/"}, {name: "FastAPI", url: "https://fastapi.tiangolo.com/"}, {name: "DVC", url: "https://dvc.org/"}], project: "Containerized LLM API" },
+        13: { title: "Advanced RAG and Fine-Tuning (Part 1)", objective: "Move beyond basic patterns to more sophisticated, production-ready techniques like re-ranking and Parameter-Efficient Fine-Tuning (PEFT).", resources: [{name: "Paper: 'LoRA'", url: "https://arxiv.org/abs/2106.09685"}, {name: "Hugging Face PEFT library", url: "https://github.com/huggingface/peft"}], project: "The Socratic Tutor" },
+        14: { title: "Advanced RAG and Fine-Tuning (Part 2)", objective: "Continue mastering advanced RAG with query transformations and hybrid search, and deepen understanding of PEFT methods like LoRA.", resources: [{name: "LlamaIndex Advanced Modules", url: "https://docs.llamaindex.ai/en/stable/"}, {name: "LangChain Expression Language", url: "https://python.langchain.com/docs/expression_language/"}], project: "The Socratic Tutor" },
+        15: { title: "LLM Optimization and Efficient Inference (Part 1)", objective: "Master the critical production skill of making LLMs run faster and cheaper, focusing on quantization.", resources: [{name: "Paper: 'FlashAttention'", url: "https://arxiv.org/abs/2205.14135"}, {name: "bitsandbytes", url: "https://github.com/TimDettmers/bitsandbytes"}, {name: "auto-gptq", url: "https://github.com/AutoGPTQ/AutoGPTQ"}], project: "The Optimized Deployer" },
+        16: { title: "LLM Optimization and Efficient Inference (Part 2)", objective: "Continue mastering optimization with a focus on high-performance inference servers like vLLM.", resources: [{name: "vLLM library", url: "https://github.com/vllm-project/vllm"}], project: "The Optimized Deployer" },
+        17: { title: "Building Agentic Workflows (Part 1)", objective: "Transition from single-purpose LLM applications to creating sophisticated, multi-step, tool-using agents.", resources: [{name: "Paper: 'Chain-of-Thought Prompting'", url: "https://arxiv.org/abs/2201.11903"}, {name: "LangChain Agents", url: "https://python.langchain.com/docs/modules/agents/"}], project: "The Autonomous Research Assistant" },
+        18: { title: "Building Agentic Workflows (Part 2)", objective: "Explore more advanced multi-agent systems and frameworks for collaboration and role-playing.", resources: [{name: "Microsoft's AutoGen", url: "https://microsoft.github.io/autogen/"}, {name: "CrewAI", url: "https://www.crewai.com/"}], project: "The Autonomous Research Assistant" },
+        19: { title: "AGI, Alignment, and the Future of AI (Part 1)", objective: "Engage deeply with the conceptual and ethical frontiers of AI, developing a nuanced perspective on its long-term trajectory and risks.", resources: [{name: "Paper: 'Sparks of AGI'", url: "https://arxiv.org/abs/2303.12712"}, {name: "Paper: 'Constitutional AI'", url: "https://arxiv.org/abs/2212.08073"}], project: "Begin Public Synthesis (Blog Writing)" },
+        20: { title: "AGI, Alignment, and the Future of AI (Part 2)", objective: "Continue study of AI safety and alignment, and begin formulating your own perspective on the key challenges.", resources: [{name: "Newsletter: Import AI", url: "https://importai.substack.com/"}, {name: "Podcast: Latent Space", url: "https://www.latent.space/podcast"}], project: "Begin Public Synthesis (Blog Writing)" },
+        21: { title: "Open Source Contribution & Community Involvement (Part 1)", objective: "Make the critical transition from a consumer of open-source software to an active contributor. Start with small contributions.", resources: [{name: "Hugging Face Forums/Discord", url: "https://huggingface.co/discord"}, {name: "EleutherAI Discord", url: "https://discord.gg/eleutherai"}], project: "Submit a documentation PR or bug report" },
+        22: { title: "Open Source Contribution & Community Involvement (Part 2)", objective: "Aim for a more substantial contribution, such as fixing a bug or adding a small feature.", resources: [{name: "GitHub 'good first issue' labels", url: "https://github.com/search?q=label%3A%22good+first+issue%22+state%3Aopen&type=Issues&ref=advsearch&l=&l="}], project: "Get one non-trivial pull request merged" },
+        23: { title: "The Capstone Project & The Next Horizon (Part 1)", objective: "Synthesize all learned skills into a single, high-impact portfolio project. Begin building the 'NexusMind' system.", resources: [], project: "Capstone Project: NexusMind" },
+        24: { title: "The Capstone Project & The Next Horizon (Part 2)", objective: "Complete the capstone project and plan the next stage of your journey by formalizing a research or startup proposal.", resources: [], project: "Capstone Project: NexusMind & Future Proposal" },
+    },
+    projects: [
+        { name: "The Vector Visualizer", level: "Beginner", topic: "Math", description: "Write a Python script using NumPy to perform fundamental matrix operations (e.g., multiplication, inversion). Use Matplotlib to visualize the effect of a transformation matrix on a set of vectors in a 2D plane. This project forces a tangible connection between the abstract mathematical operation and its geometric interpretation." },
+        { name: "Gradient Descent from Scratch", level: "Beginner", topic: "Math", description: "Implement the gradient descent algorithm from scratch using only Python and NumPy. Write a function that takes a simple polynomial function and its derivative, and iteratively finds the minimum value. Plot the convergence to visualize the optimization process." },
+        { name: "Simulating CLT and EDA", level: "Beginner", topic: "Math", description: "Part 1: Write a Python script to visually demonstrate the Central Limit Theorem. Part 2: Select a real-world dataset, load it into a Pandas DataFrame, and perform a basic exploratory data analysis (EDA), calculating descriptive statistics and plotting feature distributions." },
+        { name: "Comprehensive EDA", level: "Intermediate", topic: "Python", description: "Select a complex and messy dataset from Kaggle. Perform a full end-to-end EDA, including data cleaning, feature engineering, and creating a comprehensive report in a Jupyter Notebook with a wide array of visualizations to communicate insights." },
+        { name: "Scikit-Learn Showdown", level: "Intermediate", topic: "ML", description: "Select a Kaggle competition (e.g., Titanic). Use scikit-learn to build, train, and evaluate at least three different classification models. Perform systematic hyperparameter tuning and create a report comparing model performance." },
+        { name: "The Classic Classifiers", level: "Intermediate", topic: "DL", description: "Build and train two distinct models in PyTorch. 1) An image classifier (CNN) on a dataset like CIFAR-10. 2) A text classifier (LSTM) for sentiment analysis on the IMDB dataset. This provides experience with the dominant pre-Transformer deep learning paradigms." },
+        { name: "Appreciating Abstraction", level: "Intermediate", topic: "LLM", description: "Part 1: Implement a basic Transformer encoder block from scratch in PyTorch to understand the mechanics of self-attention. Part 2: Use the Hugging Face `Transformers` library to solve a similar task in just a few lines of code to appreciate the power of abstraction." },
+        { name: "Fine-Tuning on the Hub", level: "Advanced", topic: "LLM", description: "Select a custom text classification dataset and fine-tune a pre-trained model like `distilbert-base-uncased`. Track the experiment with Weights & Biases. Upon completion, upload the fine-tuned model and its tokenizer to the Hugging Face Hub." },
+        { name: "The PDF Chatbot", level: "Advanced", topic: "LLM", description: "Build a functional RAG pipeline that allows a user to 'chat' with a specific document (e.g., the 'Attention Is All You Need' paper). Use a sentence-transformer, a vector store (Chroma/FAISS), and an open-source LLM for generation." },
+        { name: "Containerized LLM API", level: "Advanced", topic: "MLOps", description: "Take a previously built model (fine-tuned classifier or RAG bot) and productionize it. Wrap the logic in a FastAPI application, then write a `Dockerfile` to containerize the entire application for reproducible deployment." },
+        { name: "The Socratic Tutor", level: "Advanced", topic: "LLM", description: "Enhance the RAG chatbot by integrating a re-ranker to improve retrieval quality. Then, use the LoRA technique to fine-tune a larger model (e.g., Llama-3-8B) on a Socratic dialogue dataset to create an agent that asks probing questions." },
+        { name: "The Optimized Deployer", level: "Advanced", topic: "MLOps", description: "Take the LoRA-tuned 'Socratic Tutor' model, quantize it to 4-bit precision using QLoRA, and benchmark the performance vs. size trade-off. Deploy the quantized model using the vLLM inference server and compare its throughput to a naive deployment." },
+        { name: "The Autonomous Research Assistant", level: "Advanced", topic: "LLM", description: "Build a multi-tool agent that automates research. The agent should be able to use a web search tool, ingest findings into a RAG pipeline, and then use an LLM to synthesize the information into a coherent summary with citations." },
+    ],
+    resources: {
+        papers: [
+            { title: "Attention Is All You Need", summary: "Introduced the Transformer architecture, based solely on a self-attention mechanism, which became the foundation for virtually all modern large language models.", url: "https://arxiv.org/abs/1706.03762" },
+            { title: "BERT", summary: "Established the pre-training/fine-tuning paradigm with a model that learns deep bidirectional representations using a Masked Language Model (MLM) objective.", url: "https://arxiv.org/abs/1810.04805" },
+            { title: "Language Models are Few-Shot Learners (GPT-3)", summary: "Demonstrated that scaling language models to 175B parameters unlocks remarkable 'in-context learning' abilities without any gradient updates.", url: "https://arxiv.org/abs/2005.14165" },
+            { title: "Chain-of-Thought Prompting", summary: "Showed that prompting LLMs to generate intermediate reasoning steps dramatically improves performance on complex reasoning tasks.", url: "https://arxiv.org/abs/2201.11903" },
+            { title: "Retrieval-Augmented Generation (RAG)", summary: "Introduced a hybrid framework combining a parametric generator with a non-parametric retriever to improve factuality and allow knowledge updates.", url: "https://arxiv.org/abs/2005.11401" },
+            { title: "LoRA: Low-Rank Adaptation", summary: "Proposed a parameter-efficient fine-tuning (PEFT) method that drastically reduces the computational cost of adapting large models by injecting small, trainable matrices.", url: "https://arxiv.org/abs/2106.09685" },
+            { title: "FlashAttention", summary: "Introduced an IO-aware exact attention algorithm that results in significant speedups and memory savings, enabling Transformers to handle much longer sequences.", url: "https://arxiv.org/abs/2205.14135" },
+            { title: "LLaMA: Open and Efficient Foundation Models", summary: "Showed that smaller models trained on more data can outperform larger models, releasing a family of powerful open-source models.", url: "https://arxiv.org/abs/2302.13971" },
+            { title: "Constitutional AI", summary: "Proposed a method for training a harmless AI assistant using AI feedback instead of human feedback, based on a set of guiding principles (a 'constitution').", url: "https://arxiv.org/abs/2212.08073" },
+            { title: "Sparks of Artificial General Intelligence (GPT-4)", summary: "Argued that an early version of GPT-4 exhibits sparks of AGI, demonstrating more general intelligence and near human-level performance on diverse and difficult tasks.", url: "https://arxiv.org/abs/2303.12712" }
+        ],
+        courses: [
+            { name: "Mathematics for Machine Learning (DeepLearning.AI)", url: "https://www.coursera.org/specializations/mathematics-machine-learning-data-science" },
+            { name: "Machine Learning Specialization (Andrew Ng)", url: "https://www.coursera.org/specializations/machine-learning-introduction" },
+            { name: "Deep Learning Specialization (Andrew Ng)", url: "https://www.coursera.org/specializations/deep-learning" },
+            { name: "Hugging Face NLP Course", url: "https://huggingface.co/learn/nlp-course" },
+            { name: "fast.ai: Practical Deep Learning", url: "https://course.fast.ai/" },
+            { name: "IBM Python for Data Science (Coursera)", url: "https://www.coursera.org/learn/python-for-applied-data-science-ai" },
+            { name: "Applied Data Science with Python Specialization (U of Michigan)", url: "https://www.coursera.org/specializations/app-data-science" }
+        ],
+        channels: [
+            { name: "Andrej Karpathy", url: "https://www.youtube.com/@AndrejKarpathy" },
+            { name: "Yannic Kilcher", url: "https://www.youtube.com/@YannicKilcher" },
+            { name: "Krish Naik", url: "https://www.youtube.com/@krishnaik06" },
+            { name: "3Blue1Brown", url: "https://www.youtube.com/@3blue1brown" },
+            { name: "StatQuest", url: "https://www.youtube.com/@statquest" },
+            { name: "Stanford Online", url: "https://www.youtube.com/@stanfordonline" }
+        ],
+        communities: [
+            { name: "Hugging Face (Forums & Discord)", url: "https://huggingface.co/discord" },
+            { name: "EleutherAI (Discord)", url: "https://discord.gg/eleutherai" },
+            { name: "GitHub", url: "https://github.com/" },
+            { name: "Reddit (r/MachineLearning)", url: "https://www.reddit.com/r/MachineLearning/" }
+        ]
+    },
+    tools: [
+        { category: "Core", items: ["Python", "NumPy", "Pandas", "scikit-learn", "Matplotlib", "Jupyter"] },
+        { category: "ML/DL", items: ["PyTorch", "TensorFlow", "Hugging Face Transformers & Datasets"] },
+        { category: "LLMs/Agents", items: ["LangChain", "LlamaIndex", "Chroma", "FAISS", "OpenAI API"] },
+        { category: "MLOps", items: ["Weights & Biases", "MLflow", "Docker", "Git", "FastAPI", "Ray Serve"] },
+        { category: "Optimization", items: ["vLLM", "Quantization (bitsandbytes, auto-gptq)", "Model Parallelism"] }
+    ],
+    capstone: {
+        title: '"NexusMind": A Multi-Agent, Self-Updating Knowledge System',
+        concept: "Design, build, and deploy a production-ready AI system that autonomously monitors a specific, fast-moving domain (e.g., AI alignment research). The system will ingest new information in real-time, continuously update its own knowledge base, and serve this evolving knowledge through an interactive, expert agentic interface.",
+        components: [
+            { name: "The Watcher Agent", description: "An autonomous, scheduled agent that monitors multiple sources (arXiv, Twitter, RSS feeds) for new information." },
+            { name: "The Ingestion & Advanced RAG Pipeline", description: "Triggered by the Watcher, this pipeline downloads content, uses advanced chunking, and stores embeddings in a production-grade vector database (e.g., Qdrant, Weaviate)." },
+            { name: "The Synthesizer Agent", description: "Analyzes new documents in the context of existing knowledge, generates summaries, and identifies novel contributions or contradictions." },
+            { name: "The LoRA-Tuned Analyst", description: "A specialized LLM, fine-tuned using PEFT on expert Q&A, that serves as the user-facing analyst, answering questions with nuance based on the RAG system's knowledge." },
+            { name: "The Deployed API & UI", description: "The entire system is architected for production, with the model deployed on a high-performance server (vLLM), wrapped in a FastAPI backend, and served via a simple UI (e.g., Streamlit, React)." }
+        ],
+        ethics: "The project documentation must include a dedicated chapter on the system's 'Constitution.' This will be an explicit set of principles encoded into the prompts and logic of the agents, such as requiring citations, handling conflicting information, and expressing uncertainty.",
+        bonus: "As a final step, the LoRA-tuned Analyst model, along with a curated training dataset and a detailed model card, will be published to the Hugging Face Hub, acting as a significant contribution to the open-source community."
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const timelineContainer = document.getElementById('timeline-container');
+    const detailsTitle = document.getElementById('details-title');
+    const detailsContent = document.getElementById('details-content');
+    const projectsGrid = document.getElementById('projects-grid');
+    const projectFiltersContainer = document.getElementById('project-filters');
+    const resourcesContainer = document.getElementById('resources-container');
+    const toolsContainer = document.getElementById('tools-container');
+    const capstoneContainer = document.getElementById('capstone-container');
+    const projectTopicSelect = document.getElementById('project-topic-select');
+    const generateProjectsBtn = document.getElementById('generate-projects-btn');
+    const projectGeneratorOutput = document.getElementById('project-generator-output');
+    
+    let skillChart;
+    const skillLabels = ['SQL', 'Python', 'Math', 'Core ML', 'Deep Learning', 'LLMs/AGI', 'MLOps'];
+    const baseSkills = [5, 1, 1, 0, 0, 0, 0];
+    const targetSkills = [5, 5, 4, 5, 5, 5, 5];
+
+    const monthlySkillGains = {
+        1: { 'Python': 0.5, 'Math': 0.5 }, 2: { 'Math': 0.5 }, 3: { 'Math': 0.5 }, 4: { 'Python': 0.5 },
+        5: { 'Core ML': 1 }, 6: { 'Core ML': 1 }, 7: { 'Deep Learning': 1, 'Python': 0.5 }, 8: { 'Deep Learning': 1 },
+        9: { 'LLMs/AGI': 0.5, 'Deep Learning': 0.5 }, 10: { 'LLMs/AGI': 0.5 }, 11: { 'LLMs/AGI': 0.5 }, 12: { 'MLOps': 1 },
+        13: { 'LLMs/AGI': 0.5, 'Deep Learning': 0.25 }, 14: { 'LLMs/AGI': 0.5, 'Deep Learning': 0.25 }, 15: { 'MLOps': 1, 'LLMs/AGI': 0.25 }, 16: { 'MLOps': 1, 'LLMs/AGI': 0.25 },
+        17: { 'LLMs/AGI': 0.5, 'Python': 0.5 }, 18: { 'LLMs/AGI': 0.5, 'Python': 0.5 }, 19: { 'LLMs/AGI': 0.25 }, 20: { 'LLMs/AGI': 0.25 },
+        21: { 'Python': 0.5, 'MLOps': 0.5 }, 22: { 'Python': 0.5, 'MLOps': 0.5 }, 23: { 'Core ML': 1.5, 'Deep Learning': 1.5, 'MLOps': 1 }, 24: { 'Core ML': 1.5, 'LLMs/AGI': 0.5, 'Math': 1.5 }
+    };
+
+
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=`;
+    const API_KEY = ""; 
+
+    async function callGeminiAPI(prompt, outputElement) {
+        outputElement.innerHTML = '<div class="flex justify-center items-center p-4"><div class="spinner"></div></div>';
+        
+        const payload = {
+            contents: [{ role: "user", parts: [{ text: prompt }] }]
+        };
+
+        try {
+            const response = await fetch(API_URL + API_KEY, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API call failed with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                outputElement.innerHTML = `<div class="gemini-output">${text.replace(/\n/g, '<br>')}</div>`;
+            } else {
+                throw new Error("Invalid response structure from API.");
+            }
+        } catch (error) {
+            console.error("Gemini API call error:", error);
+            outputElement.innerHTML = `<div class="gemini-output text-red-600">Sorry, I couldn't generate a response. Please try again later.</div>`;
+        }
+    }
+
+    function renderTimeline() {
+        timelineContainer.innerHTML = '';
+        roadmapData.phases.forEach(phase => {
+            const phaseDiv = document.createElement('div');
+            phaseDiv.innerHTML = `
+                <h3 class="text-2xl font-bold text-sky-700 mb-4">${phase.name}</h3>
+                <p class="text-slate-600 mb-6">${phase.description}</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    ${phase.months.map(monthNum => `
+                        <div class="timeline-item bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-xl hover:bg-sky-50 transition-all duration-200 text-center" data-month="${monthNum}">
+                            <div class="font-bold text-xl text-slate-800">Month ${monthNum}</div>
+                            <div class="mt-2 flex items-center justify-center gap-2 text-sm">
+                                <input type="checkbox" id="month-${monthNum}-cb" data-month="${monthNum}" class="month-checkbox h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600">
+                                <label for="month-${monthNum}-cb">Complete</label>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            timelineContainer.appendChild(phaseDiv);
+        });
+
+        document.querySelectorAll('.timeline-item').forEach(item => {
+            const month = item.dataset.month;
+            const checkbox = item.querySelector('.month-checkbox');
+            
+            item.addEventListener('click', (e) => {
+                if (e.target.type !== 'checkbox') {
+                    updateDetails(month);
+                    document.querySelectorAll('.timeline-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    detailsTitle.parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+
+            checkbox.addEventListener('change', updateSkillChart);
+        });
+    }
+
+    function updateDetails(month) {
+        const data = roadmapData.monthlyDetails[month];
+        if (data) {
+            detailsTitle.textContent = `Month ${month}: ${data.title}`;
+            detailsContent.innerHTML = `
+                <p class="font-semibold text-slate-800">Objective:</p>
+                <p>${data.objective}</p>
+                <p class="font-semibold text-slate-800 mt-4">Key Resources:</p>
+                <ul class="list-disc list-inside text-sky-700">
+                    ${data.resources.map(r => `<li><a href="${r.url}" target="_blank" class="text-sky-700 hover:underline">${r.name}</a></li>`).join('')}
+                </ul>
+                <p class="font-semibold text-slate-800 mt-4">Project:</p>
+                <p class="bg-sky-100 text-sky-800 p-3 rounded-lg">${data.project}</p>
+                <div class="mt-6">
+                    <button id="get-insights-btn" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition-colors">Get AI Insights ✨</button>
+                    <div id="insights-output" class="mt-4"></div>
+                </div>
+            `;
+
+            document.getElementById('get-insights-btn').addEventListener('click', () => {
+                const prompt = `As an expert AI career coach, explain the importance of focusing on "${data.title}" during this phase of the learning journey. The stated objective is: "${data.objective}". How does this connect to previous learnings and prepare for what's next? Keep it encouraging and concise.`;
+                const outputElement = document.getElementById('insights-output');
+                callGeminiAPI(prompt, outputElement);
+            });
+        }
+    }
+
+    function renderProjects(filter = 'All') {
+        projectsGrid.innerHTML = '';
+        const filteredProjects = roadmapData.projects.filter(p => 
+            filter === 'All' || p.level === filter || p.topic === filter
+        );
+
+        filteredProjects.forEach(project => {
+            const projectCard = document.createElement('div');
+            projectCard.className = 'bg-white p-6 rounded-2xl shadow hover:shadow-xl transition-shadow duration-300 cursor-pointer';
+            projectCard.innerHTML = `
+                <h4 class="font-bold text-xl text-slate-800 mb-2">${project.name}</h4>
+                <div class="flex gap-2 mb-4">
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${project.level}</span>
+                    <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${project.topic}</span>
+                </div>
+                <div class="description hidden text-slate-600">${project.description}</div>
+            `;
+            projectsGrid.appendChild(projectCard);
+
+            projectCard.addEventListener('click', () => {
+                projectCard.querySelector('.description').classList.toggle('hidden');
+            });
+        });
+    }
+
+    function setupProjectGenerator() {
+        const topics = [...new Set(roadmapData.projects.map(p => p.topic))];
+        topics.forEach(topic => {
+            const option = document.createElement('option');
+            option.value = topic;
+            option.textContent = topic;
+            projectTopicSelect.appendChild(option);
+        });
+
+        generateProjectsBtn.addEventListener('click', () => {
+            const selectedTopic = projectTopicSelect.value;
+            const prompt = `You are an AI project idea generator. Brainstorm 3 creative, hands-on project ideas for an aspiring AI engineer focused on the topic of "${selectedTopic}". For each project, provide a name, a brief 1-2 sentence description, and suggest a difficulty level (Beginner, Intermediate, or Advanced). Format the response clearly.`;
+            callGeminiAPI(prompt, projectGeneratorOutput);
+        });
+    }
+
+    function renderProjectFilters() {
+        const levels = ['All', ...new Set(roadmapData.projects.map(p => p.level))];
+        const topics = [...new Set(roadmapData.projects.map(p => p.topic))];
+        const filters = [...levels, ...topics];
+
+        filters.forEach(filter => {
+            const button = document.createElement('button');
+            button.className = 'filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-slate-700 shadow-sm hover:bg-sky-100 transition-colors';
+            button.textContent = filter;
+            button.dataset.filter = filter;
+            if (filter === 'All') button.classList.add('active');
+            projectFiltersContainer.appendChild(button);
+
+            button.addEventListener('click', () => {
+                renderProjects(filter);
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    }
+    
+    function renderResources() {
+        resourcesContainer.innerHTML = `
+            <div class="space-y-8">
+                <div>
+                    <h4 class="text-xl font-bold text-slate-800 mb-4">📚 Top 10 Essential Papers</h4>
+                    <div class="space-y-3">
+                        ${roadmapData.resources.papers.map((paper, index) => `
+                            <div class="bg-slate-50 rounded-lg" id="paper-${index}">
+                                <details class="group">
+                                    <summary class="flex items-center justify-between cursor-pointer p-3 ">
+                                        <a href="${paper.url}" target="_blank" class="font-semibold text-sky-700 hover:underline">${index + 1}. ${paper.title}</a>
+                                        <span class="transform transition-transform duration-200 group-open:rotate-90">▶</span>
+                                    </summary>
+                                    <p class="px-3 pb-3 text-slate-600">${paper.summary}</p>
+                                </details>
+                                <div class="p-3 border-t border-slate-200">
+                                    <button class="explain-paper-btn text-sm text-sky-600 font-semibold" data-title="${paper.title}" data-summary="${paper.summary}" data-output-id="paper-output-${index}">Explain Like I'm 5 ✨</button>
+                                    <div id="paper-output-${index}" class="mt-2"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-800 mb-4">🎓 Top Online Courses</h4>
+                    <ul class="list-disc list-inside space-y-2">${roadmapData.resources.courses.map(c => `<li><a href="${c.url}" target="_blank" class="text-sky-700 hover:underline">${c.name}</a></li>`).join('')}</ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-800 mb-4">📺 Best YouTube Channels</h4>
+                    <ul class="list-disc list-inside space-y-2">${roadmapData.resources.channels.map(c => `<li><a href="${c.url}" target="_blank" class="text-sky-700 hover:underline">${c.name}</a></li>`).join('')}</ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-800 mb-4">💬 Essential Communities</h4>
+                    <ul class="list-disc list-inside space-y-2">${roadmapData.resources.communities.map(c => `<li><a href="${c.url}" target="_blank" class="text-sky-700 hover:underline">${c.name}</a></li>`).join('')}</ul>
+                </div>
+            </div>
+        `;
+        document.querySelectorAll('.explain-paper-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const { title, summary, outputId } = btn.dataset;
+                const prompt = `Explain the core idea of the paper "${title}" like I'm 5 years old. Here is a technical summary for context: "${summary}". Use a simple analogy if possible.`;
+                const outputElement = document.getElementById(outputId);
+                callGeminiAPI(prompt, outputElement);
+            });
+        });
+    }
+
+    function renderTools() {
+        const icons = {
+            Core: '⚙️', ML: '🧠', LLMs: '🤖', MLOps: '🚀', Optimization: '⚡'
+        };
+        roadmapData.tools.forEach(category => {
+            const categoryKey = Object.keys(icons).find(k => category.category.startsWith(k)) || 'Core';
+            const div = document.createElement('div');
+            div.className = 'bg-white p-6 rounded-2xl shadow-lg';
+            div.innerHTML = `
+                <h4 class="text-xl font-bold text-slate-800 mb-4">${icons[categoryKey]} ${category.category}</h4>
+                <div class="flex flex-wrap gap-2">
+                    ${category.items.map(item => `<span class="bg-slate-100 text-slate-800 text-sm font-medium px-3 py-1 rounded-full">${item}</span>`).join('')}
+                </div>
+            `;
+            toolsContainer.appendChild(div);
+        });
+    }
+
+    function renderCapstone() {
+        const data = roadmapData.capstone;
+        capstoneContainer.innerHTML = `
+            <h3 class="text-2xl font-bold text-sky-700">${data.title}</h3>
+            <p class="text-slate-600">${data.concept}</p>
+            <div>
+                <h4 class="text-xl font-semibold text-slate-800 mb-3">System Components</h4>
+                <div class="space-y-4">
+                    ${data.components.map(c => `
+                        <div class="p-4 bg-slate-50 rounded-lg">
+                            <p class="font-bold text-slate-700">${c.name}</p>
+                            <p class="text-slate-600">${c.description}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xl font-semibold text-slate-800 mb-3">Ethical Design & AGI Alignment</h4>
+                <p class="text-slate-600">${data.ethics}</p>
+            </div>
+            <div>
+                <h4 class="text-xl font-semibold text-slate-800 mb-3">Bonus: Open Source Contribution</h4>
+                <p class="text-slate-600">${data.bonus}</p>
+            </div>
+        `;
+    }
+
+    function initializeSkillChart() {
+        const ctx = document.getElementById('skillChart').getContext('2d');
+        skillChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: skillLabels,
+                datasets: [{
+                    label: 'Current Skills',
+                    data: [...baseSkills],
+                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                    borderColor: 'rgba(56, 189, 248, 1)',
+                    pointBackgroundColor: 'rgba(56, 189, 248, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(56, 189, 248, 1)'
+                }, {
+                    label: 'Target Skills (24 Months)',
+                    data: targetSkills,
+                    backgroundColor: 'rgba(15, 23, 42, 0.2)',
+                    borderColor: 'rgba(15, 23, 42, 1)',
+                    pointBackgroundColor: 'rgba(15, 23, 42, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(15, 23, 42, 1)'
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                        pointLabels: { font: { size: 12 } },
+                        ticks: {
+                            backdropColor: 'transparent',
+                            stepSize: 1
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 5
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    }
+
+    function updateSkillChart() {
+        const currentSkills = [...baseSkills];
+        const completedMonths = document.querySelectorAll('.month-checkbox:checked');
+        
+        completedMonths.forEach(checkbox => {
+            const month = checkbox.dataset.month;
+            const gains = monthlySkillGains[month];
+            if (gains) {
+                for (const [skill, gain] of Object.entries(gains)) {
+                    const index = skillLabels.indexOf(skill);
+                    if (index !== -1) {
+                        currentSkills[index] += gain;
+                    }
+                }
+            }
+        });
+
+        skillChart.data.datasets[0].data = currentSkills.map((val, i) => Math.min(val, targetSkills[i]));
+        skillChart.update();
+    }
+
+    function setupSmoothScrolling() {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    }
+
+    renderTimeline();
+    renderProjectFilters();
+    renderProjects();
+    setupProjectGenerator();
+    renderResources();
+    renderTools();
+    renderCapstone();
+    initializeSkillChart();
+    setupSmoothScrolling();
+    
+    document.querySelector('.nav-link[href="#introduction"]').classList.add('active');
+});
+</script>
+</body>
+</html>
